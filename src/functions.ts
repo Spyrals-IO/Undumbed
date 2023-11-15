@@ -11,3 +11,4 @@ export const promisify = <F extends (..._params: ReadonlyArray<any>) => unknown>
 })
 
 export const compose = <A, B, R>(f: (a: A) => B, g: (b: B) => R): (a: A) => R => (a: A) => g(f(a))
+export const negate = <I>(f: (input: I) => boolean): (input: I) => boolean => (input: I): boolean => !f(input)

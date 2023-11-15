@@ -8,9 +8,23 @@ declare global {
   interface Object {
     entries<K extends string | number | symbol, V>(this: Record<K, V>): ReadonlyArray<[K, V]>
     map<K extends string | number | symbol, V, R>(this: Record<K, V>, f: (k: K, v: V, index: number, obj: Record<K, V>) => R): Record<K, R>
-    flatten<K1 extends string | number, K2 extends string | number, V>(this: Record<K1, Record<K2, V>>): Record<`${K1}.${K2}`, V>
+    // TODO
+    includes<K extends string | number | symbol, V, K2  extends string | number | symbol, V2>(this: Record<K, V>, other: Record<K2, V2>): this is Record<K, V> & Record<K2, V2>
+    filter<K extends string | number | symbol, V>(this: Record<K, V>, f: (k: K, v: V, index: number, obj: Record<K, V>) => boolean): Record<K, V>
+    filter<K extends string | number | symbol, V, R extends V>(this: Record<K, V>, f: (k: K, v: V, index: number, obj: Record<K, V>) => v is R): Record<K, R>
+    flatten<K1 extends string | number, V>(this: Record<K1, V | null | undefined | V>): Record<K1, V>
+    sequence<K extends string | number | symbol, V>(this: Record<string, Promise<V>>): Promise<Record<K, V>>
+    sum<K extends string | number | symbol>(this: Record<K, number>): number
+    median<K extends string | number | symbol>(this: Record<K, number>): number
+    isEmpty(): boolean
+    show<K extends string | number | symbol, V>(this: Record<K, V>, opts: {separator?: string, start?: string, end?: string, keyValueShow?: (key: K, value: V) => string}): string
+    excludes<K extends string | number | symbol>(this: Record<K, unknown>, keys: ReadonlyArray<K>)
+    updateAt<K extends string | number | symbol, Key extends K, V, V1>(this: Record<K, V>, key: Key, value: V1): Record<K, V> & Record<Key, V1>
   }
 }
+
+const obj = {a: 1} as const
+const tmp = obj.flatten()
 
 /** Functional style */
 

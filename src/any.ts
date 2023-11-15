@@ -1,13 +1,15 @@
-import { isArray } from "./type"
+import { isArray, isBigInt, isBoolean, isDate, isNil, isNull, isNumber, isObject, isString, isSymbol, isUndefined } from "./type"
 import { isEmpty as isEmptyArray } from "./array"
+import { negate } from "./functions"
+import "./object"
 
 export const isEmpty = (value: unknown): boolean => {
   if(isArray(value)) return isEmptyArray(value)
-  else if (isString(value)) return isEmptyString(value)
-  else if (isDate(value)) return isEmptyDate(value)
-  else if (isObject(value)) return isEmptyObject(value)
-  else if (isBigInt(value) || isNumber(value)) return isEmptyNumber(value)
-  else if (isBoolean(value)) return isEmptyBoolean(value)
+  else if (isString(value)) return value === ''
+  else if (isDate(value)) return value.getTime() === 0
+  else if (isObject(value)) return Object.keys(value).length === 0
+  else if (isBigInt(value) || isNumber(value)) value === 0
+  else if (isBoolean(value)) return value === false
   else if (isSymbol(value)) return false
   else if (isNil(value)) return true
 
@@ -25,6 +27,6 @@ export const areEquals = (value1: unknown, value2: unknown): boolean =>
     !isNull(value2) &&
     !isUndefined(value1) &&
     !isUndefined(value2) &&
-    value1.entries().some(([key1, value2]) => !isUndefined(value2.entries().find(([key2, value2]) => key1 === key2 && areEquals(value1, value2))))
+    value1.entries().some(([key1, value1]) => !isUndefined(value2.entries().find(([key2, value2]) => key1 === key2 && areEquals(value1, value2))))
     )
   )

@@ -1,5 +1,5 @@
 import { identity } from './functions'
-import { isArray, isFunction } from './type';
+import { isArray, isFunction, isNotNil } from './type';
 
 declare global {
   interface ReadonlyArray<T> {
@@ -11,10 +11,22 @@ declare global {
     unzip<A, B>(this: ReadonlyArray<[A, B]>): [ReadonlyArray<A>, ReadonlyArray<B>];
     isEmpty(): boolean
     distinct(key?: T extends object ? keyof T : never): ReadonlyArray<T>
-    show(this: ReadonlyArray<string | number>, separator: string, start?: string, end?: string): string
+    show(this: ReadonlyArray<string | number>, opts: { separator: string, start?: string, end?: string }): string //TODO ops
     excludes(toExcludes: ReadonlyArray<T>, comparator?: (v1: T, v2: T) => boolean): ReadonlyArray<T>
     updateAt(array: ReadonlyArray<T>, objectIndex: number, newValue: T | ((value: T) => T)): ReadonlyArray<T>
     append(value: T | ReadonlyArray<T>): ReadonlyArray<T>
+    pick(): T | undefined
+    prepend(value: T): ReadonlyArray<T>
+    uniq(): ReadonlyArray<T>
+    uniqFor(comparator: (e1: T, e2: T) => boolean)
+    uniqBy<K extends string | number | symbol, T extends Record<K, unknown>>(this: ReadonlyArray<T>, key: K): ReadonlyArray<T>
+    take(length: number): ReadonlyArray<T>
+    takeRight(length: number): ReadonlyArray<T>
+    cartesianProduct<T2>(arr2: ReadonlyArray<T2>): ReadonlyArray<[T, T2]>
+    shuffle(): ReadonlyArray<T>
+    median(this: ReadonlyArray<number>): number
+    flatten(this: ReadonlyArray<ReadonlyArray<T> | undefined | null | T>): ReadonlyArray<T>
+    sequence(this: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>>
   }
 }
 
@@ -63,7 +75,6 @@ export const updateAt = <T>(array: ReadonlyArray<T>, objectIndex: number, newVal
 export const append = <T>(array: ReadonlyArray<T>, value: T | ReadonlyArray<T>): ReadonlyArray<T> => 
   [...array, ...(!isArray(value) ? [value] : value) ]
 
-  // TODOs
 export const pick = <T>(array: ReadonlyArray<T>): T | undefined =>
   array[Math.floor(Math.random() * array.length)]
 
@@ -81,6 +92,9 @@ export const uniqBy = <K extends string | number | symbol, T extends Record<K, u
 
 export const take = <T>(array: ReadonlyArray<T>,length: number): ReadonlyArray<T> =>
   array.slice(0, length)
+
+export const takeRight = <T>(array: ReadonlyArray<T>, length: number): ReadonlyArray<T> =>
+  array.slice(-length)
 
 export const cartesianProduct = <T1, T2>(arr1: ReadonlyArray<T1>, arr2: ReadonlyArray<T2>): ReadonlyArray<[T1, T2]> =>
   arr1.flatMap(value1 => arr2.map(value2 => [value1, value2] as [T1, T2]))
@@ -103,6 +117,11 @@ export const median = (arr: ReadonlyArray<number>): number => {
   const nums = [...arr].sort((a, b) => a - b)
   return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2
 };
+
+export const flatten = <T>(array: ReadonlyArray<ReadonlyArray<T> | null | undefined | T>): ReadonlyArray <T> => 
+  array.filter(isNotNil).flatMap(t => isArray(t) ? t : [t])
+
+export const sequence = <T>(array: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>> => Promise.all(array)
 
 /** Object style */
 
@@ -148,4 +167,52 @@ Array.prototype['excludes'] = function<T>(this: ReadonlyArray<T>, toExcludes: Re
 
 Array.prototype['updateAt'] = function<T>(this: ReadonlyArray<T>, objectIndex: number, newValue: T | ((value: T) => T)): ReadonlyArray<T> {
   return updateAt(this, objectIndex, newValue)
+}
+
+Array.prototype['pick'] = function<T>(this: ReadonlyArray<T>): T | undefined {
+  return pick(this)
+}
+
+Array.prototype['prepend'] = function<T>(this: ReadonlyArray<T>, value: T): ReadonlyArray<T> {
+  return prepend(this, value)
+}
+
+Array.prototype['uniq'] = function<T>(this: ReadonlyArray<T>): ReadonlyArray<T> {
+  return uniq(this)
+}
+
+Array.prototype['uniqFor'] = function<T>(this: ReadonlyArray<T>, comparator: (e1: T, e2: T) => boolean): ReadonlyArray<T> {
+  return uniqFor(this, comparator)
+}
+
+Array.prototype['uniqBy'] = function<K extends string | number | symbol, T extends Record<K, unknown>>(this: ReadonlyArray<T>, key: K): ReadonlyArray<T> {
+  return uniqBy(this, key)
+}
+
+Array.prototype['take'] = function<T>(this: ReadonlyArray<T>,length: number): ReadonlyArray<T> {
+  return take(this, length)
+}
+
+Array.prototype['takeRight'] = function<T>(this: ReadonlyArray<T>,length: number): ReadonlyArray<T> {
+  return takeRight(this, length)
+}
+
+Array.prototype['cartesianProduct'] = function<T1, T2>(this: ReadonlyArray<T1>, arr2: ReadonlyArray<T2>): ReadonlyArray<[T1, T2]> {
+  return cartesianProduct(this, arr2)
+}
+
+Array.prototype['shuffle'] = function<T>(this: ReadonlyArray<T>): ReadonlyArray<T> {
+  return shuffle(this)
+}
+
+Array.prototype['median'] = function(this: ReadonlyArray<number>): number {
+  return median(this)
+}
+
+Array.prototype['flatten'] = function<T>(this: ReadonlyArray<ReadonlyArray<T> | null | undefined | T>): ReadonlyArray <T> {
+  return flatten(this)
+} as never // conflict with object
+
+Array.prototype['sequence'] = function<T>(this: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>> {
+  return sequence(this)
 }

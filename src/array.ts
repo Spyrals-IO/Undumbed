@@ -11,7 +11,7 @@ declare global {
     unzip<A, B>(this: ReadonlyArray<[A, B]>): [ReadonlyArray<A>, ReadonlyArray<B>];
     isEmpty(): boolean
     distinct(key?: T extends object ? keyof T : never): ReadonlyArray<T>
-    show(this: ReadonlyArray<string | number>, opts: { separator: string, start?: string, end?: string }): string //TODO ops
+    show(this: ReadonlyArray<string | number>, opts: { separator: string, start?: string, end?: string }): string
     excludes(toExcludes: ReadonlyArray<T>, comparator?: (v1: T, v2: T) => boolean): ReadonlyArray<T>
     updateAt(array: ReadonlyArray<T>, objectIndex: number, newValue: T | ((value: T) => T)): ReadonlyArray<T>
     append(value: T | ReadonlyArray<T>): ReadonlyArray<T>
@@ -59,8 +59,8 @@ export const isEmpty = <T>(arr: ReadonlyArray<T>): arr is [T, ...ReadonlyArray<T
 export const distinct = <T>(arr: ReadonlyArray<T>, key?: T extends object ? keyof T : undefined): ReadonlyArray<T> =>
   arr.filter((element, index) => arr.find((e, i) => index !== i && key ? element[key] === e[key] : element === e))
 
-export const show = (arr: ReadonlyArray<string | number>, separator: string, start: string = '', end: string = ''): string =>
-  arr.reduce((acc, e) => acc + e.toString() + separator , start) + end
+export const show = (arr: ReadonlyArray<string | number>, opts: { separator: string, start: string, end: string} = {separator: ',', start: '[', end: ']'}): string =>
+  arr.reduce((acc, e) => acc + e.toString() + opts.separator , opts.start) + opts.end
 
 export const zip = <T1, T2>(arr1: ReadonlyArray<T1>, arr2: ReadonlyArray<T2>): ReadonlyArray<[T1, T2]> =>
   arr1.map((e1, index) => [e1, arr2[index]])
@@ -135,7 +135,7 @@ Array.prototype['last'] = function<T>(this: ReadonlyArray<T>): T | undefined {
 
 Array.prototype['sum'] = function(this: ReadonlyArray<number>): number {
   return sum(this)
-}
+} as never // conflict with object
 
 Array.prototype['zipWithIndex'] = function<T>(this: ReadonlyArray<T>): ReadonlyArray<[T, number]> {
   return zipWithIndex(this)
@@ -153,9 +153,9 @@ Array.prototype['distinct'] = function<T>(this: ReadonlyArray<T>, key?: T extend
   return distinct(this, key)
 }
 
-Array.prototype['show'] = function(this: ReadonlyArray<string | number>, separator: string, start: string = '', end: string = ''): string {
-  return show(this, separator, start, end)
-}
+Array.prototype['show'] = function(this: ReadonlyArray<string | number>, opts: { separator: string, start: string, end: string } = { separator: ',', start: '[', end: ']'}): string {
+  return show(this, opts)
+} as never // conflict with object
 
 Array.prototype['zip'] = function<T1, T2>(this: ReadonlyArray<T1>, arr2: ReadonlyArray<T2>): ReadonlyArray<[T1, T2]> {
   return zip(this, arr2)
@@ -163,11 +163,11 @@ Array.prototype['zip'] = function<T1, T2>(this: ReadonlyArray<T1>, arr2: Readonl
 
 Array.prototype['excludes'] = function<T>(this: ReadonlyArray<T>, toExcludes: ReadonlyArray<T>, comparator: (v1: T, v2: T) => boolean = defaultComparator): ReadonlyArray<T> {
   return excludes(this, toExcludes, comparator)
-}
+} as never // conflict with object
 
 Array.prototype['updateAt'] = function<T>(this: ReadonlyArray<T>, objectIndex: number, newValue: T | ((value: T) => T)): ReadonlyArray<T> {
   return updateAt(this, objectIndex, newValue)
-}
+} as never // conflict with object
 
 Array.prototype['pick'] = function<T>(this: ReadonlyArray<T>): T | undefined {
   return pick(this)
@@ -207,7 +207,7 @@ Array.prototype['shuffle'] = function<T>(this: ReadonlyArray<T>): ReadonlyArray<
 
 Array.prototype['median'] = function(this: ReadonlyArray<number>): number {
   return median(this)
-}
+} as never // conflict with object
 
 Array.prototype['flatten'] = function<T>(this: ReadonlyArray<ReadonlyArray<T> | null | undefined | T>): ReadonlyArray <T> {
   return flatten(this)
@@ -215,4 +215,4 @@ Array.prototype['flatten'] = function<T>(this: ReadonlyArray<ReadonlyArray<T> | 
 
 Array.prototype['sequence'] = function<T>(this: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>> {
   return sequence(this)
-}
+} as never // conflict with object

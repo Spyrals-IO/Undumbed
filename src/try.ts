@@ -1,9 +1,4 @@
-interface Monad<T> { //WIP 
-  map<T1>(f: (value: T) => T1): Monad<T1> 
-  flatten(this: Try<Try<T>>): Try<T>
-}
-
-interface Try<T> {
+export interface Try<T> {
   readonly value: T | Error
   map<T1>(f: (value: T) => T1): Try<T1>
   mapError(f: (err: Error) => Error): Try<T>

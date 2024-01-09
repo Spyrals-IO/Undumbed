@@ -3,33 +3,144 @@ import { isArray, isFunction, isNotNil } from './type';
 
 declare global {
   interface ReadonlyArray<T> {
+    /**
+     * Split the array into multiple equivalently sized new arrays.
+     * 
+     * @returns
+     *  - If size isn't a strictly positive value, returns [this]
+     *  - If size > this.length size is assumed to be equal to length
+     */
     chunk(size: number): ReadonlyArray<ReadonlyArray<T>>
+    /**
+     * @returns the last element, if any
+     */
     last(): T | undefined
+    /**
+     * @returns the computed sum of this array
+     */
     sum(this: ReadonlyArray<number>): number
+    /**
+     * Create a new array of tuples made of each elements of this array and the provided one, in order.
+     * 
+     * @returns if the provided array is bigger than this one, the remaining elements are ignored
+     */
     zip<T1>(array: ReadonlyArray<T1>): ReadonlyArray<[T, T1]>;
+    /**
+     * @returns A new array of tuples, made of the values of this array and their index
+     */
     zipWithIndex(): ReadonlyArray<[T, number]>;
+    /**
+     * @returns a tuple of two arrays containing the separated values of this one.
+     */
     unzip<A, B>(this: ReadonlyArray<[A, B]>): [ReadonlyArray<A>, ReadonlyArray<B>];
+    /**
+     * @returns true if the array has a length of 0
+     */
     isEmpty(): boolean
-    distinct(key?: T extends object ? keyof T : never): ReadonlyArray<T>
+    /**
+     * Create a copy of this array without elements which had the same key.
+     * If no key is provided, will compare elements of the array by value.
+     * 
+     * @example
+     * ```ts
+     * const animals = [{animal: 'cat', size: 10}, {animal: 'cat', size: 20}, {animal: 'dog', size: 100}]
+     * const neverMultipleSameAnimale = animals.distinct('animal')
+     * // [{animal: 'cat', size: 10}, {animal: 'dog', size: 100}]
+     * ```
+     * @returns an array of the first values (in order) found for the key, if provided.
+     */
+    distinct<T extends Record<string, unknown>>(this: ReadonlyArray<T>, key: keyof T): ReadonlyArray<T>
+    /**
+     * Transform this array into a string.
+     * 
+     * @argument opts the options on how to display that array.
+     * @argument opts.separator the string used in between the elements. Default to ",".
+     * @argument opts.start the string to put at the start of the output. Default to "{".
+     * @argument opts.end the string to put at the end of the output. Default to "}"
+     */
     show(this: ReadonlyArray<string | number>, opts: { separator: string, start?: string, end?: string }): string
+    /**
+     * Return a copy of this array with elements of `toExcludes` removed.
+     * @argument comparator How two elements should be compare, needs to return true when the element are considered equals.
+     * 
+     * Default comparator is a simple ===.
+     * 
+     */
     excludes(toExcludes: ReadonlyArray<T>, comparator?: (v1: T, v2: T) => boolean): ReadonlyArray<T>
-    updateAt(array: ReadonlyArray<T>, objectIndex: number, newValue: T | ((value: T) => T)): ReadonlyArray<T>
+    /**
+     * Create a copy of this array, with the value at `index` changed to `newValue`.
+     */
+    updateAt(array: ReadonlyArray<T>, index: number, newValue: T | ((value: T) => T)): ReadonlyArray<T>
+    /**
+     * Return a copy of this array, with the provided element(s) appended at the end.
+     */
     append(value: T | ReadonlyArray<T>): ReadonlyArray<T>
+    /**
+     * Return a random value of this array, of none if the array was empty.
+     */
     pick(): T | undefined
-    prepend(value: T): ReadonlyArray<T>
+    /**
+     * Create a copy of this array, with the provided elements added at the start of the array.
+     */
+    prepend(value: T | ReadonlyArray<T>): ReadonlyArray<T>
+    /**
+     * Return a new array without duplicated elements. Compared using ===
+     * 
+     * const catNames = ['miaous', 'milo', 'leo', 'sylvester','miaous']
+     * const uniqCatNames = catNames.uniq()
+     * // ['miaous', 'milo', 'leo', 'sylvester']
+     */
     uniq(): ReadonlyArray<T>
+    /**
+     * Return a new array without duplicated elements, using the provided comparator to test for equality.
+     */
     uniqFor(comparator: (e1: T, e2: T) => boolean)
-    uniqBy<K extends string | number | symbol, T extends Record<K, unknown>>(this: ReadonlyArray<T>, key: K): ReadonlyArray<T>
+    /**
+     * Return a new array without duplicated elements. Duplication is based on having the same value for the provided `key`.
+     */
+    uniqBy<T extends Record<string, unknown>>(this: ReadonlyArray<T>, key: keyof T): ReadonlyArray<T>
+    /**
+     * Create a copy of this array containing groups of this one's elements.
+     * The groups have been split on the value of the field `key`.
+     * 
+     * @example
+     * ```ts
+     * const animals = [{species: 'cat', size: 10}, {species: 'cat', size: 20}, {species: 'dog', size: 100}]
+     * const bySpecies = animals.groupBy('species')
+     * // [[{species: 'cat', size: 10}, {species: 'cat', size: 20}], [{species: 'dog', size: 100}]]
+     * ```
+     */
+    groupBy<T extends Record<string, unknown>>(this: ReadonlyArray<T>, key: keyof T): ReadonlyArray<ReadonlyArray<T>>
+    /**
+     * Return a copy of this array containing `length` element from the start of this one.
+     */
     take(length: number): ReadonlyArray<T>
+    /**
+     * Return a copy of this array containing `length` element from the end of this one.
+     */
     takeRight(length: number): ReadonlyArray<T>
+    /**
+     * Create a new array of tuples appairring each value of this array to every and each value of the provided one.
+     */
     cartesianProduct<T2>(arr2: ReadonlyArray<T2>): ReadonlyArray<[T, T2]>
+    /**
+     * Return a new copy of this array with the element randomly re-ordered
+     */
     shuffle(): ReadonlyArray<T>
+    /**
+     * Return the median of this array's values
+     */
     median(this: ReadonlyArray<number>): number
+    /**
+     * Return a new array without empty values and with the inners array inlined.
+     */
     flatten(this: ReadonlyArray<ReadonlyArray<T> | undefined | null | T>): ReadonlyArray<T>
+    /**
+     * Transform many promise into a single one.
+     */
     sequence(this: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>>
   }
 }
-
 /** Functional style */
 
 export const range = <T = number>(
@@ -56,8 +167,12 @@ export const unzip = <A, B>(arr: ReadonlyArray<[A, B]>): [ReadonlyArray<A>, Read
 
 export const isEmpty = <T>(arr: ReadonlyArray<T>): arr is [T, ...ReadonlyArray<T>] => arr.length === 0;
 
-export const distinct = <T>(arr: ReadonlyArray<T>, key?: T extends object ? keyof T : undefined): ReadonlyArray<T> =>
-  arr.filter((element, index) => arr.find((e, i) => index !== i && key ? element[key] === e[key] : element === e))
+export const distinct = <T>(arr: ReadonlyArray<T>, key?: T extends object ? keyof T : undefined): ReadonlyArray<T> => {
+  if(key === undefined)
+    return [...new Set(arr)]
+  else
+    return arr.filter((element, index) => arr.find((e, i) => index !== i && key ? element[key] === e[key] : element === e))
+}
 
 export const show = (arr: ReadonlyArray<string | number>, opts: { separator: string, start: string, end: string} = {separator: ',', start: '[', end: ']'}): string =>
   arr.reduce((acc, e) => acc + e.toString() + opts.separator , opts.start) + opts.end
@@ -123,6 +238,14 @@ export const flatten = <T>(array: ReadonlyArray<ReadonlyArray<T> | null | undefi
 
 export const sequence = <T>(array: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>> => Promise.all(array)
 
+export const groupBy = <T extends Record<string, unknown>>(self: ReadonlyArray<T>, key: keyof T): ReadonlyArray<ReadonlyArray<T>> =>
+  self.reduce((acc, v) => {
+    const value = v[key]
+    const groupIndex = acc.findIndex((group) => group[0][key] === value)
+    acc[groupIndex].push(v)
+    return acc
+  }, [] as Array<Array<T>> )
+
 /** Object style */
 
 Array.prototype['chunk'] = function<T>(this: ReadonlyArray<T>, size: number): ReadonlyArray<ReadonlyArray<T>> {
@@ -173,7 +296,7 @@ Array.prototype['pick'] = function<T>(this: ReadonlyArray<T>): T | undefined {
   return pick(this)
 }
 
-Array.prototype['prepend'] = function<T>(this: ReadonlyArray<T>, value: T): ReadonlyArray<T> {
+Array.prototype['prepend'] = function<T>(this: ReadonlyArray<T>, value: T | ReadonlyArray<T>): ReadonlyArray<T> {
   return prepend(this, value)
 }
 
@@ -216,3 +339,7 @@ Array.prototype['flatten'] = function<T>(this: ReadonlyArray<ReadonlyArray<T> | 
 Array.prototype['sequence'] = function<T>(this: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>> {
   return sequence(this)
 } as never // conflict with object
+
+Array.prototype['groupBy'] = function<T extends Record<string, unknown>>(this: ReadonlyArray<T>, key: keyof T): ReadonlyArray<ReadonlyArray<T>> {
+  return groupBy(this, key)
+}

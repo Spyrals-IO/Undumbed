@@ -1,8 +1,7 @@
 {
-  "name": "Undumbed",
-  "version": "1.0.0",
+  "name": "undumbed",
+  "version": "0.1.0",
   "description": "Array, Object, Set, Map and other structure as they should just be",
-  "main": "index.ts",
   "repository": "git@github.com:Spyrals-IO/Undumbed.git",
   "author": "Methrat0n <merlingoulet@spyrals.fr>",
   "license": "MIT",

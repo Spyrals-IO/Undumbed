@@ -8,11 +8,26 @@ declare global {
 
 declare global {
   interface Object {
+    /**
+     * Return the entries of this object, in an array of key-value tuples.
+     */
     entries<K extends string | number | symbol, V>(this: Record<K, V>): ReadonlyArray<[K, V]>
+    /**
+     * Build a new object by applying `f` to each entry of this object.
+     */
     map<K extends string | number | symbol, V, R>(this: Record<K, V>, f: (k: K, v: V, index: number, obj: Record<K, V>) => R): Record<K, R>
+    /**
+     * Refine this object to know if it completly contains another one.
+     */
     includes<K extends string | number | symbol, V, K2  extends K, V2 extends V>(this: Record<K, V>, other: Record<K2, V2>): this is Record<K, V> & Record<K2, V2>
+    /**
+     * Select the properties to keep in a newly created object based on the return of f.
+     */
     filter<K extends string | number | symbol, V>(this: Record<K, V>, f: (k: K, v: V, index: number, obj: Record<K, V>) => boolean): Record<K, V>
     filter<K extends string | number | symbol, V, R extends V>(this: Record<K, V>, f: (k: K, v: V, index: number, obj: Record<K, V>) => v is R): Record<K, R>
+    /**
+     * Fold this object into a value.
+     */
     reduce<K extends  string | number | symbol, V, R>(this: Record<K, V>, f: (acc: R, k: K, v: V, i: number, obj: this) => R, init: R): R
     flatten<K1 extends string | number | symbol, V>(this: Record<K1, null | undefined | V>): Record<K1, V>
     sequence<K extends string | number | symbol, V>(this: Record<string, Promise<V>>): Promise<Record<K, V>>

@@ -28,11 +28,11 @@ export const areEquals = (value1: unknown, value2: unknown): boolean =>
   typeof value1 === typeof value2 &&
   (value1 === value2 ||
     (isObject(value1) &&
-      isObject(value2) &&
-      !isNull(value1) &&
-      !isNull(value2) &&
-      !isUndefined(value1) &&
-      !isUndefined(value2) &&
+    isObject(value2) &&
+    !isNull(value1) &&
+    !isNull(value2) &&
+    !isUndefined(value1) &&
+    !isUndefined(value2) &&
       (
         (Object.keys(value1).length !== 0 || Object.keys(value2).length !== 0) &&
         Object.keys(value1).every((key1) => {

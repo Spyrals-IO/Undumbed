@@ -5,5 +5,18 @@
   "repository": "git@github.com:Spyrals-IO/Undumbed.git",
   "author": "Methrat0n <merlingoulet@spyrals.fr>",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "devDependencies": {
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "chai": "^5.1.0",
+    "chai-as-promised": "^7.1.1",
+    "fast-check": "^3.15.1",
+    "mocha": "^10.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "test": "mocha './test/*.specs.ts' --require ts-node/register"
+  }
 }

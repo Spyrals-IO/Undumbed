@@ -34,11 +34,11 @@ export const areEquals = (value1: unknown, value2: unknown): boolean =>
     !isUndefined(value1) &&
     !isUndefined(value2) &&
       (
-        (Object.keys(value1).length !== 0 || Object.keys(value2).length !== 0) &&
-        Object.keys(value1).every((key1) => {
-          return key1 in value2 && areEquals(value1[key1], value2[key1]);
+        (Object.entries(value1).length !== 0 || Object.entries(value2).length !== 0) &&
+        Object.entries(value1).every(([key1, value1]) => {
+          return key1 in value2 && areEquals(value1, value2[key1]);
         }) &&
-        Object.keys(value2).every((key2) => {
+        Object.entries(value2).every(([key2, _]) => {
           return key2 in value1;
         })
       )

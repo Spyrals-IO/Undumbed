@@ -1,6 +1,7 @@
 import "mocha";
 import fc from "fast-check";
-import { sum, chunk, last } from "../src/array";
+import { sum, chunk, last, zipWithIndex } from "../src/array";
+import { areEquals } from '../src/any'
 
 describe("chunk: ", () => {
   it("Should split non-empty arrays into chunks of the specified size", () =>
@@ -57,7 +58,7 @@ describe("last: ", () => {
     it("Should return undefined for an empty array", () => {
       fc.assert(
         fc.property(fc.array(fc.anything(), { maxLength: 0 }), (arr) => {
-          last(arr) === undefined
+          return last(arr) === undefined
         })
       );
     });
@@ -66,7 +67,7 @@ describe("last: ", () => {
     fc.assert(
       fc.property(fc.anything(), (element) => {
         const arr = [element];
-        last(arr) === element
+        return last(arr) === element
       })
     );
   });
@@ -76,15 +77,43 @@ describe("sum: ", () => {
     it("Should return 0 for an empty array", () => {
       fc.assert(
         fc.property(fc.constant([]), (arr) => {
-          sum(arr) === 0
+          return sum(arr) === 0
+        }))})
+
+    it("Should return the correct sum", () => {
+      fc.assert(
+        fc.property(fc.array(fc.double()), (arr) => {
+          return sum(arr) === arr.reduce((acc, n) => acc + n, 0)
+        })
+      );
+    });
+  });
+
+describe("zipWithIndex: ", () => {
+    it("Should zip each element with its index", () => {
+      fc.assert(
+        fc.property(fc.array(fc.anything()), (arr) => {
+          const result = zipWithIndex(arr);
+          return result.every(([v, i]) => arr[i] === v)
         })
       );
     });
   
-    it("Should return the correct sum", () => {
+    it("Should return an empty array for an empty input array", () => {
       fc.assert(
-        fc.property(fc.array(fc.double()), (arr) => {
-          sum(arr) === arr.reduce((acc, n) => acc + n, 0)
+        fc.property(fc.constant([]), (arr) => {
+          const result = zipWithIndex(arr);
+          return result.length === 0
+        })
+      );
+    });
+  
+    it("Should return a single-element array for a single-element input array", () => {
+      fc.assert(
+        fc.property(fc.anything(), (element) => {
+          const arr = [element];
+          const result = zipWithIndex(arr);
+          return result.length === 1 && result[0][0] === element && result[0][1] === 0
         })
       );
     });

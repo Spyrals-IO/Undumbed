@@ -1,6 +1,6 @@
 import "mocha";
 import fc from "fast-check";
-import { chunk, last } from "../src/array";
+import { sum, chunk, last } from "../src/array";
 
 describe("chunk: ", () => {
   it("Should split non-empty arrays into chunks of the specified size", () =>
@@ -71,3 +71,21 @@ describe("last: ", () => {
     );
   });
 })
+
+describe("sum: ", () => {
+    it("Should return 0 for an empty array", () => {
+      fc.assert(
+        fc.property(fc.array(fc.integer(), { maxLength: 0 }), (arr) => {
+          sum(arr) === 0
+        })
+      );
+    });
+  
+    it("Should return the correct sum", () => {
+      fc.assert(
+        fc.property(fc.array(fc.double()), (arr) => {
+          sum(arr) === arr.reduce((acc, n) => acc + n, 0)
+        })
+      );
+    });
+  });

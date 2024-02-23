@@ -1,6 +1,6 @@
 import "mocha";
 import fc from "fast-check";
-import { sum, chunk, last, zipWithIndex, unzip, distinct } from "../src/array";
+import { sum, chunk, last, zipWithIndex, unzip, distinct, range } from "../src/array";
 import { areEquals } from "../src/any";
 
 describe("chunk: ", () => {
@@ -190,4 +190,39 @@ describe("zipWithIndex: ", () => {
         })
       ))
     
+})
+
+describe("range: ", () => {
+  it("Should generate an array with the correct length", () => {
+    fc.assert(
+      fc.property(fc.nat(), (length) => range(length).length === length)
+    )
+  })
+
+  it("Should generate an array of numbers from 0 to length - 1 by default", () => {
+    fc.assert(
+      fc.property(fc.nat(), (length) => {
+        const result = range(length);
+        return result.every((v, i) => v === i)
+      })
+    )
+  })
+
+  it("Should generate an array with values returned by the filler function", () => {
+    fc.assert(
+      fc.property(fc.nat(), fc.func(fc.integer()), (length, filler) => {
+        const result = range(length, filler);
+        return result.every((v, i) => areEquals(v, filler(i)))
+      })
+    )
+  })
+
+  it("Should return empty array for negative or zero length", () => {
+    fc.assert(
+      fc.property(fc.integer({ max: 0 }), (length) => {
+        const result = range(length)
+        return result.length === 0
+      })
+    )
+  })
 })

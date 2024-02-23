@@ -27,20 +27,28 @@ export const isNotEmpty = negate(isEmpty)
 export const areEquals = (value1: unknown, value2: unknown): boolean =>
   typeof value1 === typeof value2 &&
   (value1 === value2 ||
-    (isObject(value1) &&
-    isObject(value2) &&
-    !isNull(value1) &&
-    !isNull(value2) &&
-    !isUndefined(value1) &&
-    !isUndefined(value2) &&
-      (
-        (Object.entries(value1).length !== 0 || Object.entries(value2).length !== 0) &&
-        Object.entries(value1).every(([key1, value1]) => {
-          return key1 in value2 && areEquals(value1, value2[key1]);
-        }) &&
-        Object.entries(value2).every(([key2, _]) => {
-          return key2 in value1;
-        })
-      )
-    )
+    arrayEquals(value1, value2) ||
+    objectEquals(value1, value2)
   )
+
+const arrayEquals = (value1: unknown, value2: unknown) => 
+  Array.isArray(value1) && Array.isArray(value2) &&
+  value1.length === value2.length &&
+  value1.every((e1, i1) => areEquals(e1, value2[i1]))
+
+const objectEquals = (value1: unknown, value2: unknown) => 
+  isObject(value1) &&
+  isObject(value2) &&
+  !isNull(value1) &&
+  !isNull(value2) &&
+  !isUndefined(value1) &&
+  !isUndefined(value2) &&
+    (
+      (Object.entries(value1).length !== 0 || Object.entries(value2).length !== 0) &&
+      Object.entries(value1).every(([key1, value1]) => {
+        return key1 in value2 && areEquals(value1, value2[key1]);
+      }) &&
+      Object.entries(value2).every(([key2, _]) => {
+        return key2 in value1;
+      })
+    )

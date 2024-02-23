@@ -1,3 +1,4 @@
+import { areEquals } from './any';
 import { identity } from './functions'
 import { isArray, isFunction, isNotNil } from './type';
 
@@ -171,7 +172,7 @@ export const distinct = <T>(arr: ReadonlyArray<T>, key?: T extends object ? keyo
   if(key === undefined)
     return [...new Set(arr)]
   else
-    return arr.filter((element, index) => arr.find((e, i) => index !== i && key ? element[key] === e[key] : element === e))
+    return arr.filter((element, index) => arr.findIndex((e, i) => index !== i && areEquals(element[key], e[key])) === index)
 }
 
 export const show = (arr: ReadonlyArray<string | number>, opts: { separator: string, start: string, end: string} = {separator: ',', start: '[', end: ']'}): string =>

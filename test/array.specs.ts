@@ -1,6 +1,7 @@
 import "mocha";
 import fc from "fast-check";
-import { sum, chunk, last, zipWithIndex, unzip } from "../src/array";
+import { sum, chunk, last, zipWithIndex, unzip, distinct } from "../src/array";
+import { areEquals } from "../src/any";
 
 describe("chunk: ", () => {
   it("Should split non-empty arrays into chunks of the specified size", () =>
@@ -146,3 +147,47 @@ describe("zipWithIndex: ", () => {
       )
     })
   })
+
+  describe("distinct: ", () => {
+    it("Should remove duplicates from any array", () =>
+    fc.assert(
+        fc.property(fc.array(fc.anything()), (arr) => {
+            const distinctArr = distinct(arr);
+            const set = new Set(distinctArr);
+            return distinctArr.length === set.size
+        })
+    ))
+
+    it("Should return an empty array if one was passed", () => {
+      fc.assert(
+        fc.property(fc.constant([]), (arr) => {
+          const distinctArr = distinct(arr);
+          return distinctArr.length === 0
+        })
+      )
+    });
+
+    it("Should deduplicate elements of an array", () =>
+      fc.assert(
+        fc.property(fc.array(fc.integer()), (arr) => {
+          const duplicateArr = [...arr, ...arr];
+          const distinctArr = distinct(duplicateArr);
+          const set = new Set(distinctArr);
+          return distinctArr.length === set.size
+        })
+      ))
+
+    const arrayOfObjectWithKeyValuePairInCommon = () => fc.string({minLength: 1}).chain(key => 
+      fc.tuple(fc.array(fc.object()), fc.anything()).map(([objs, value]) => 
+        [key, objs.map(obj => ({...obj, [key]: value}))] as const
+      )
+    )
+    it("It should remove element that have the same value for a key passed", () =>
+      fc.assert(
+        fc.property(arrayOfObjectWithKeyValuePairInCommon(), ([key, arr]) => {
+          const distinctArr = distinct(arr, key);
+          return distinctArr.length < arr.length || (distinctArr.length === 0 && arr.length === 0)
+        })
+      ))
+    
+})

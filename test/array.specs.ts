@@ -1,6 +1,6 @@
 import "mocha";
 import fc from "fast-check";
-import { sum, chunk, last, zipWithIndex, unzip, distinct, range, zip } from "../src/array";
+import { sum, chunk, last, zipWithIndex, unzip, distinct, range, zip, append } from "../src/array";
 import { areEquals } from "../src/any";
 
 const anythingButNan = () => fc.anything().filter(thing => !Number.isNaN(thing))
@@ -262,3 +262,22 @@ describe("zip: ", () => {
     );
   });
 });
+
+describe("append: ", () => {
+  it("Should append a value to any array", () => {
+      fc.assert(
+        fc.property(fc.array(fc.anything()), anythingButNan().filter(thing => !Array.isArray(thing)), (arr, value) => {
+          const result = append(arr, value)
+          return last(result) === value && result.length === arr.length + 1
+        })
+      )
+    })
+    it("Should append values to any array", () => {
+      fc.assert(
+        fc.property(fc.array(fc.anything()), fc.array(fc.anything()), (arr, values) => {
+          const result = append(arr, values)
+          return result.length === arr.length + values.length
+        })
+      )
+    })
+  })

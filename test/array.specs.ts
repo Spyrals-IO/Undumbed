@@ -75,7 +75,7 @@ describe("last: ", () => {
 describe("sum: ", () => {
     it("Should return 0 for an empty array", () => {
       fc.assert(
-        fc.property(fc.array(fc.integer(), { maxLength: 0 }), (arr) => {
+        fc.property(fc.constant([]), (arr) => {
           sum(arr) === 0
         })
       );

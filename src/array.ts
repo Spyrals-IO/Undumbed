@@ -182,7 +182,7 @@ export const zip = <T1, T2>(arr1: ReadonlyArray<T1>, arr2: ReadonlyArray<T2>): R
 
 const defaultComparator = <T>(v1: T, v2: T): boolean => v1 === v2
 export const excludes = <T>(arr: ReadonlyArray<T>, toExcludes: ReadonlyArray<T>, comparator: (v1: T, v2: T) => boolean = defaultComparator): ReadonlyArray<T> =>
-  arr.filter(e1 => !toExcludes.find(e2 => comparator(e1, e2)))
+  arr.filter(e1 => toExcludes.every(e2 => !comparator(e1, e2)))
 
 export const updateAt = <T>(array: ReadonlyArray<T>, objectIndex: number, newValue: T | ((value: T) => T)): ReadonlyArray<T> => 
   array.map((item, index) => index === objectIndex ? isFunction(newValue) ? newValue(item) : newValue : item)

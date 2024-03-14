@@ -1,7 +1,8 @@
 import "mocha"
-import fc, { Value } from "fast-check"
+import fc  from "fast-check"
 import { areEquals, isEmpty, isNotEmpty } from "../src/any"
-import { strict as assert } from "assert"
+
+const nonEmptyObject = () => fc.object().filter(obj => Object.keys(obj).length > 0)
 
 //isEmpty tests
 describe("isEmpty: ", () => {
@@ -32,105 +33,101 @@ describe("isEmpty: ", () => {
       })
     ))
 
-    it("Should return true for empty objects", () =>
-    fc.assert(
-        fc.property(fc.constant({}), (value) => {
-            isEmpty(value)
-        })
-    ))
+  it("Should return true for empty objects", () =>
+  fc.assert(
+      fc.property(fc.constant({}), (value) => {
+          isEmpty(value)
+      })
+  ))
 
-    it("Should return false for non-empty objects", () =>
-    fc.assert(
-        fc.property(fc.object().filter(obj => Object.keys(obj).length > 0), (value) => {
-            !isEmpty(value)
-        })
-    ))
+  it("Should return false for non-empty objects", () =>
+  fc.assert(
+      fc.property(nonEmptyObject(), (value) => {
+          !isEmpty(value)
+      })
+  ))
 
-    it("Should return true for null or undefined values", () => {
-      fc.assert(fc.property(fc.constant(null), (value) => isEmpty(value)));
-      fc.assert(fc.property(fc.constant(undefined), (value) => isEmpty(value)));
-    });
+  it("Should return true for null or undefined values", () => {
+    fc.assert(fc.property(fc.constant(null), (value) => isEmpty(value)));
+    fc.assert(fc.property(fc.constant(undefined), (value) => isEmpty(value)));
+  });
 
   it("Should return true for false boolean", () => {
     fc.assert(fc.property(fc.constant(false), (boo) => isEmpty(boo) === true))
   })  
 
-  it("Should return false for true boolean", () =>
-  fc.assert(
-    fc.property(fc.constant(true), (boo) => !isEmpty(boo))
-  )
-);
+  it("Should return false for true boolean", () => {
+    fc.assert(fc.property(fc.constant(true), (boo) => !isEmpty(boo)))
+  });
 
-it("Should return true for BigInt or Number values equal to 0", () =>
-    fc.assert(
-        fc.property(fc.oneof(fc.bigInt({ max: 0n }), fc.constant(0)), (value) => {
-            isEmpty(value) === (value === 0n)
-        }
-        )
-    ));
-
-    it("Should return false for BigInt or Number values not equal to 0", () =>
-    fc.assert(
-      fc.property(fc.oneof(fc.bigInt({ max: -1n }), fc.float({ min: 1 })),(value) => {
-        !isEmpty(value)
-        })
-    ))
-
-    it("Should return true for empty Date", () =>
-    fc.assert(
-      fc.property(fc.constant(new Date(0)), (value) => isEmpty(value))
+  it("Should return true for BigInt equal to 0", () => {
+    fc.assert(fc.property(fc.constant(0n), (value) => {
+          isEmpty(value)
+      })
     )
-    );  
+  });
+
+
+  it("Should return true for number equal to 0", () => {
+    fc.assert(fc.property(fc.constant(0), (value) => {
+          isEmpty(value)
+      })
+    )
+  });
+
+  it("Should return false for BigInt not equal to 0", () =>
+    fc.assert(fc.property(fc.bigInt({ max: -1n }),(value) => {
+      !isEmpty(value)
+    }))
+  )
+
+  it("Should return false for number not equal to 0", () =>
+    fc.assert(fc.property(fc.double({ min: 1 }), (value) => {
+      !isEmpty(value)
+    }))
+  )
+
+  it("Should return true for empty Date", () =>
+    fc.assert(fc.property(fc.constant(new Date(0)), (value) => 
+      isEmpty(value)
+    ))
+  );  
 
   it("Should return false for non-empty Date", () => {
-    fc.assert(
-      fc.property(fc.date({ min: new Date(1) }), (value: Date) => !isEmpty(value))
-    )
+    fc.assert(fc.property(fc.date({ min: new Date(1) }), (value) => 
+      !isEmpty(value)
+    ))
   })
 
   it("Should return true for empty symbols", () =>
-  fc.assert(
-    fc.property(fc.constant(Symbol()), (value) => {
-      isEmpty(value);
-    })
-  ));
+    fc.assert(fc.property(fc.constant(Symbol()), (value) => {
+        isEmpty(value);
+    }))
+  );
 
-it("Should return false for non-empty symbols", () =>
-  fc.assert(
-    fc.property(fc.string(), (str) => {
-      const nonEmptySymbol = Symbol(str);
-      return !isEmpty(nonEmptySymbol);
-    })
-  ))
+  const nonEmptySymbol = () => fc.string().map(str => Symbol(str))
+  it("Should return false for non-empty symbols", () =>
+    fc.assert(fc.property(nonEmptySymbol(), (sym) => 
+      !isEmpty(sym)
+    ))
+  )
 })
 
 //isNotEmpty
 describe("isNotEmpty: ", () => {
-  it("Should return true for non-empty strings", () => {
-    fc.assert(
-      fc.property(fc.string({ minLength: 1 }), (value) => {
-        return isNotEmpty(value)
-      })
-    )
+  it("Should return true when isEmpty dont", () => {
+    fc.assert(fc.property(fc.anything(), (value) => 
+        isNotEmpty(value) !== isEmpty(value)
+    ))
   })
-
-  it("Should return false for empty strings", () => {
-    fc.assert(
-      fc.property(fc.string({ maxLength: 0 }), (value) => {
-        return !isNotEmpty(value);
-      })
-    );
-  });
 })
 
 //areEquals
 describe("areEquals: ", () => {
-  it("Should return true for equal values", () => {
-    fc.assert(
-      fc.property(fc.anything(), (value) => {
-        return areEquals(value, value)
-      })
-    )
+  it("Should return true for same values", () => {
+    fc.assert(fc.property(fc.anything(), (value) =>
+      areEquals(value, value)
+    ))
   })
 
   it("Should return false for different values", () => {
@@ -142,50 +139,18 @@ describe("areEquals: ", () => {
     )
   })
 
-// Définir un comparateur personnalisé pour les objets ayant les mêmes clés et valeurs, mais de types différents
-const sameKeysAndValuesArbitrary = fc
-  .dictionary(fc.string(), fc.oneof(fc.anything()))
-  .filter((obj) => Object.keys(obj).length > 0);  // Filtrer les objets vides
-
-
-
-  it("Should return false for objects with same keys and values, but different types", () =>
-  fc.assert(
-    fc.property(sameKeysAndValuesArbitrary, (obj) => {
-      // Create a new object with the same keys and values but different types
-      const differentTypesObj = Object.fromEntries(
-        Object.entries(obj).map(([key]) => [key, fc.anything()])
-      );
-      return !areEquals(obj, differentTypesObj);
-    })
-  )
-)
-
-  it("Should return false for objects with same keys but different values", () =>
-  fc.assert(
-    fc.property(
-      sameKeysAndValuesArbitrary,
-      sameKeysAndValuesArbitrary,
-      (obj1, obj2) => {
-        // S'assurer que obj2 a les mêmes clés que obj1 mais avec des valeurs différentes
-        obj2 = Object.fromEntries(
-          Object.entries(obj1).map(([key, value]) => [key, fc.oneof(fc.constant(value), fc.oneof(fc.string(), fc.integer()))])
-        )
-        return !areEquals(obj1, obj2);
-      }
+  const twoObjectsWithSameKeysButDifferentValues = () => fc.object().chain(obj => 
+    fc.tuple(
+      fc.constant(obj),
+      fc.record(Object.fromEntries(Object.keys(obj).map((key) => 
+        [key, fc.anything().filter(anotherValue => JSON.stringify(anotherValue) !== JSON.stringify(obj[key]))]
+      ))),
     )
   )
-)
 
-it("Should return false for objects with different types but equivalent values", () => {
-  fc.assert(
-    fc.property(
-      sameKeysAndValuesArbitrary,
-      sameKeysAndValuesArbitrary,
-      (obj1, obj2) => {
-        return  !areEquals(obj1, obj2);
-      }
-    )
+  it("Should return false for objects with same keys but different values, strictly or not", () =>
+    fc.assert(fc.property(twoObjectsWithSameKeysButDifferentValues(), ([obj1, obj2]) => 
+      !areEquals(obj1, obj2)
+    ))
   )
-})
 })

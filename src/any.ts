@@ -11,7 +11,7 @@ export const isEmpty = (value: unknown): boolean => {
   else if (isString(value)) return value === ''
   else if (isDate(value)) return value.getTime() === 0
   else if (isObject(value)) return Object.keys(value).length === 0
-  else if (isBigInt(value) || isNumber(value)) value === 0
+  else if (isBigInt(value) || isNumber(value)) return value === 0
   else if (isBoolean(value)) return value === false
   else if (isSymbol(value)) return false
   else if (isNil(value)) return true
@@ -33,6 +33,14 @@ export const areEquals = (value1: unknown, value2: unknown): boolean =>
     !isNull(value2) &&
     !isUndefined(value1) &&
     !isUndefined(value2) &&
-    value1.entries().some(([key1, value1]) => !isUndefined(value2.entries().find(([key2, value2]) => key1 === key2 && areEquals(value1, value2))))
+      (
+        (Object.entries(value1).length !== 0 || Object.entries(value2).length !== 0) &&
+        Object.entries(value1).every(([key1, value1]) => {
+          return key1 in value2 && areEquals(value1, value2[key1]);
+        }) &&
+        Object.entries(value2).every(([key2, _]) => {
+          return key2 in value1;
+        })
+      )
     )
   )

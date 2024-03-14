@@ -94,7 +94,7 @@ declare global {
     /**
      * Return a new array without duplicated elements, using the provided comparator to test for equality.
      */
-    uniqFor(comparator: (e1: T, e2: T) => boolean)
+    uniqFor(comparator: (e1: T, e2: T) => boolean): ReadonlyArray<T>
     /**
      * Return a new array without duplicated elements. Duplication is based on having the same value for the provided `key`.
      */
@@ -248,98 +248,122 @@ export const groupBy = <T extends Record<string, unknown>>(self: ReadonlyArray<T
 
 /** Object style */
 
+// @ts-ignore
 Array.prototype['chunk'] = function<T>(this: ReadonlyArray<T>, size: number): ReadonlyArray<ReadonlyArray<T>> {
   return chunk(this, size)
 }
 
+// @ts-ignore
 Array.prototype['last'] = function<T>(this: ReadonlyArray<T>): T | undefined {
   return last(this)
 }
 
+// @ts-ignore
 Array.prototype['sum'] = function(this: ReadonlyArray<number>): number {
   return sum(this)
 } as never // conflict with object
 
+// @ts-ignore
 Array.prototype['zipWithIndex'] = function<T>(this: ReadonlyArray<T>): ReadonlyArray<[T, number]> {
   return zipWithIndex(this)
 }
 
+// @ts-ignore
 Array.prototype['unzip'] = function<A, B>(this: ReadonlyArray<[A, B]>): [ReadonlyArray<A>, ReadonlyArray<B>] {
   return unzip(this)
 }
 
+// @ts-ignore
 Array.prototype['isEmpty'] = function<T>(this: ReadonlyArray<T>): boolean {
   return isEmpty(this)
 }
 
+// @ts-ignore
 Array.prototype['distinct'] = function<T>(this: ReadonlyArray<T>, key?: T extends object ? keyof T : undefined): ReadonlyArray<T> {
   return distinct(this, key)
 }
 
+// @ts-ignore
 Array.prototype['show'] = function(this: ReadonlyArray<string | number>, opts: { separator: string, start: string, end: string } = { separator: ',', start: '[', end: ']'}): string {
   return show(this, opts)
 } as never // conflict with object
 
+// @ts-ignore
 Array.prototype['zip'] = function<T1, T2>(this: ReadonlyArray<T1>, arr2: ReadonlyArray<T2>): ReadonlyArray<[T1, T2]> {
   return zip(this, arr2)
 }
 
+// @ts-ignore
 Array.prototype['excludes'] = function<T>(this: ReadonlyArray<T>, toExcludes: ReadonlyArray<T>, comparator: (v1: T, v2: T) => boolean = defaultComparator): ReadonlyArray<T> {
   return excludes(this, toExcludes, comparator)
 } as never // conflict with object
 
+// @ts-ignore
 Array.prototype['updateAt'] = function<T>(this: ReadonlyArray<T>, objectIndex: number, newValue: T | ((value: T) => T)): ReadonlyArray<T> {
   return updateAt(this, objectIndex, newValue)
 } as never // conflict with object
 
+// @ts-ignore
 Array.prototype['pick'] = function<T>(this: ReadonlyArray<T>): T | undefined {
   return pick(this)
 }
 
+// @ts-ignore
 Array.prototype['prepend'] = function<T>(this: ReadonlyArray<T>, value: T | ReadonlyArray<T>): ReadonlyArray<T> {
   return prepend(this, value)
 }
 
+// @ts-ignore
 Array.prototype['uniq'] = function<T>(this: ReadonlyArray<T>): ReadonlyArray<T> {
   return uniq(this)
 }
 
+// @ts-ignore
 Array.prototype['uniqFor'] = function<T>(this: ReadonlyArray<T>, comparator: (e1: T, e2: T) => boolean): ReadonlyArray<T> {
   return uniqFor(this, comparator)
 }
 
+// @ts-ignore
 Array.prototype['uniqBy'] = function<K extends string | number | symbol, T extends Record<K, unknown>>(this: ReadonlyArray<T>, key: K): ReadonlyArray<T> {
   return uniqBy(this, key)
 }
 
+// @ts-ignore
 Array.prototype['take'] = function<T>(this: ReadonlyArray<T>,length: number): ReadonlyArray<T> {
   return take(this, length)
 }
 
+// @ts-ignore
 Array.prototype['takeRight'] = function<T>(this: ReadonlyArray<T>,length: number): ReadonlyArray<T> {
   return takeRight(this, length)
 }
 
+// @ts-ignore
 Array.prototype['cartesianProduct'] = function<T1, T2>(this: ReadonlyArray<T1>, arr2: ReadonlyArray<T2>): ReadonlyArray<[T1, T2]> {
   return cartesianProduct(this, arr2)
 }
 
+// @ts-ignore
 Array.prototype['shuffle'] = function<T>(this: ReadonlyArray<T>): ReadonlyArray<T> {
   return shuffle(this)
 }
 
+// @ts-ignore
 Array.prototype['median'] = function(this: ReadonlyArray<number>): number {
   return median(this)
 } as never // conflict with object
 
+// @ts-ignore
 Array.prototype['flatten'] = function<T>(this: ReadonlyArray<ReadonlyArray<T> | null | undefined | T>): ReadonlyArray <T> {
   return flatten(this)
 } as never // conflict with object
 
+// @ts-ignore
 Array.prototype['sequence'] = function<T>(this: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>> {
   return sequence(this)
 } as never // conflict with object
 
+// @ts-ignore
 Array.prototype['groupBy'] = function<T extends Record<string, unknown>>(this: ReadonlyArray<T>, key: keyof T): ReadonlyArray<ReadonlyArray<T>> {
   return groupBy(this, key)
 }

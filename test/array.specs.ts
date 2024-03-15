@@ -1,7 +1,6 @@
 import "mocha";
 import fc from "fast-check";
-import { sum, chunk, last, zipWithIndex } from "../src/array";
-import { areEquals } from '../src/any'
+import { sum, chunk, last, zipWithIndex, unzip } from "../src/array";
 
 describe("chunk: ", () => {
   it("Should split non-empty arrays into chunks of the specified size", () =>
@@ -118,3 +117,32 @@ describe("zipWithIndex: ", () => {
       );
     });
   });
+
+  describe("unzip: ", () => {
+    it("Should unzip arrays of pairs", () => {
+      fc.assert(
+        fc.property(
+          fc.array(fc.tuple(fc.anything(), fc.anything()), { minLength: 1 }),
+          (pairs) => {
+            const [arr1, arr2] = unzip(pairs);
+            return (
+              arr1.every((e1, index1) => pairs[index1][0] === e1) && 
+              arr2.every((e2, index2) => pairs[index2][1] === e2)
+            )
+          }
+        )
+      )
+    })
+  
+    it("Should handle empty arrays", () => {
+      fc.assert(
+        fc.property(
+          fc.constant([]),
+          (pairs) => {
+            const [arr1, arr2] = unzip(pairs);
+            return arr1.length === 0 && arr2.length === 0
+          }
+        )
+      )
+    })
+  })

@@ -153,4 +153,8 @@ describe("areEquals: ", () => {
       !areEquals(obj1, obj2)
     ))
   )
+
+  it("Should deeply compare arrays", () => fc.assert(fc.property(fc.array(fc.anything()), (arr) =>
+    areEquals(arr, arr)
+  )))
 })

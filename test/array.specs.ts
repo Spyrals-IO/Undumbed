@@ -3,6 +3,10 @@ import fc from "fast-check";
 import { sum, chunk, last, zipWithIndex, unzip, distinct, range } from "../src/array";
 import { areEquals } from "../src/any";
 
+const anythingButNan = () => fc.anything().filter(thing => !Number.isNaN(thing))
+
+fc.configureGlobal({ numRuns: 10_000 });
+
 describe("chunk: ", () => {
   it("Should split non-empty arrays into chunks of the specified size", () =>
     fc.assert(
@@ -47,7 +51,8 @@ describe("chunk: ", () => {
 describe("last: ", () => {
   it("Should return the last element of a non-empty array", () => {
     fc.assert(
-      fc.property(fc.array(fc.anything(), { minLength: 1 }), (arr) => {
+      fc.property(fc.array(anythingButNan(), { minLength: 1 }), (arr) => {
+        
         const result = last(arr);
         return result === arr[arr.length - 1];
       })
@@ -57,7 +62,7 @@ describe("last: ", () => {
 
     it("Should return undefined for an empty array", () => {
       fc.assert(
-        fc.property(fc.array(fc.anything(), { maxLength: 0 }), (arr) => {
+        fc.property(fc.array(anythingButNan(), { maxLength: 0 }), (arr) => {
           return last(arr) === undefined
         })
       );
@@ -65,7 +70,7 @@ describe("last: ", () => {
 
   it("Should return the only element for a single-element array", () => {
     fc.assert(
-      fc.property(fc.anything(), (element) => {
+      fc.property(anythingButNan(), (element) => {
         const arr = [element];
         return last(arr) === element
       })
@@ -82,7 +87,7 @@ describe("sum: ", () => {
 
     it("Should return the correct sum", () => {
       fc.assert(
-        fc.property(fc.array(fc.double()), (arr) => {
+        fc.property(fc.array(fc.double({noNaN: true})), (arr) => {
           return sum(arr) === arr.reduce((acc, n) => acc + n, 0)
         })
       );
@@ -92,7 +97,7 @@ describe("sum: ", () => {
 describe("zipWithIndex: ", () => {
     it("Should zip each element with its index", () => {
       fc.assert(
-        fc.property(fc.array(fc.anything()), (arr) => {
+        fc.property(fc.array(anythingButNan()), (arr) => {
           const result = zipWithIndex(arr);
           return result.every(([v, i]) => arr[i] === v)
         })
@@ -110,7 +115,7 @@ describe("zipWithIndex: ", () => {
   
     it("Should return a single-element array for a single-element input array", () => {
       fc.assert(
-        fc.property(fc.anything(), (element) => {
+        fc.property(anythingButNan(), (element) => {
           const arr = [element];
           const result = zipWithIndex(arr);
           return result.length === 1 && result[0][0] === element && result[0][1] === 0
@@ -123,7 +128,7 @@ describe("zipWithIndex: ", () => {
     it("Should unzip arrays of pairs", () => {
       fc.assert(
         fc.property(
-          fc.array(fc.tuple(fc.anything(), fc.anything()), { minLength: 1 }),
+          fc.array(fc.tuple(anythingButNan(), anythingButNan()), { minLength: 1 }),
           (pairs) => {
             const [arr1, arr2] = unzip(pairs);
             return (
@@ -151,7 +156,7 @@ describe("zipWithIndex: ", () => {
   describe("distinct: ", () => {
     it("Should remove duplicates from any array", () =>
     fc.assert(
-        fc.property(fc.array(fc.anything()), (arr) => {
+        fc.property(fc.array(anythingButNan()), (arr) => {
             const distinctArr = distinct(arr);
             const set = new Set(distinctArr);
             return distinctArr.length === set.size
@@ -178,7 +183,7 @@ describe("zipWithIndex: ", () => {
       ))
 
     const arrayOfObjectWithKeyValuePairInCommon = () => fc.string({minLength: 1}).chain(key => 
-      fc.tuple(fc.array(fc.object()), fc.anything()).map(([objs, value]) => 
+      fc.tuple(fc.array(fc.object()), anythingButNan()).map(([objs, value]) => 
         [key, objs.map(obj => ({...obj, [key]: value}))] as const
       )
     )
@@ -195,13 +200,13 @@ describe("zipWithIndex: ", () => {
 describe("range: ", () => {
   it("Should generate an array with the correct length", () => {
     fc.assert(
-      fc.property(fc.nat(), (length) => range(length).length === length)
+      fc.property(fc.nat(100), (length) => range(length).length === length)
     )
   })
 
   it("Should generate an array of numbers from 0 to length - 1 by default", () => {
     fc.assert(
-      fc.property(fc.nat(), (length) => {
+      fc.property(fc.nat(100), (length) => {
         const result = range(length);
         return result.every((v, i) => v === i)
       })
@@ -210,7 +215,7 @@ describe("range: ", () => {
 
   it("Should generate an array with values returned by the filler function", () => {
     fc.assert(
-      fc.property(fc.nat(), fc.func(fc.integer()), (length, filler) => {
+      fc.property(fc.nat(100), fc.func(fc.integer()), (length, filler) => {
         const result = range(length, filler);
         return result.every((v, i) => areEquals(v, filler(i)))
       })

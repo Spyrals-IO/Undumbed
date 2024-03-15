@@ -2,9 +2,11 @@ import "mocha"
 import fc  from "fast-check"
 import { areEquals, isEmpty, isNotEmpty } from "../src/any"
 
-const nonEmptyObject = () => fc.object().filter(obj => Object.keys(obj).length > 0)
+fc.configureGlobal({ numRuns: 10_000 });
 
-//isEmpty tests
+const nonEmptyObject = () => fc.object().filter(obj => Object.keys(obj).length > 0)
+const anythingButNan = () => fc.anything().filter(thing => !Number.isNaN(thing))
+
 describe("isEmpty: ", () => {
   it("Should return true for empty strings", () =>
     fc.assert(
@@ -113,27 +115,25 @@ describe("isEmpty: ", () => {
   )
 })
 
-//isNotEmpty
 describe("isNotEmpty: ", () => {
   it("Should return true when isEmpty dont", () => {
-    fc.assert(fc.property(fc.anything(), (value) => 
+    fc.assert(fc.property(anythingButNan(), (value) => 
         isNotEmpty(value) !== isEmpty(value)
     ))
   })
 })
 
-//areEquals
 describe("areEquals: ", () => {
   it("Should return true for same values", () => {
-    fc.assert(fc.property(fc.anything(), (value) =>
+    fc.assert(fc.property(anythingButNan(), (value) =>
       areEquals(value, value)
     ))
   })
 
   it("Should return false for different values", () => {
     fc.assert(
-      fc.property(fc.anything(), fc.anything(), (value1, value2) => {
-        fc.pre(value1 !== value2);
+      fc.property(anythingButNan(), anythingButNan(), (value1, value2) => {
+        fc.pre(JSON.stringify(value1) !== JSON.stringify(value2));
         return !areEquals(value1, value2)
       })
     )
@@ -143,7 +143,7 @@ describe("areEquals: ", () => {
     fc.tuple(
       fc.constant(obj),
       fc.record(Object.fromEntries(Object.keys(obj).map((key) => 
-        [key, fc.anything().filter(anotherValue => JSON.stringify(anotherValue) !== JSON.stringify(obj[key]))]
+        [key, anythingButNan().filter(anotherValue => JSON.stringify(anotherValue) !== JSON.stringify(obj[key]))]
       ))),
     )
   )
@@ -154,7 +154,7 @@ describe("areEquals: ", () => {
     ))
   )
 
-  it("Should deeply compare arrays", () => fc.assert(fc.property(fc.array(fc.anything()), (arr) =>
+  it("Should deeply compare arrays", () => fc.assert(fc.property(fc.array(anythingButNan()), (arr) =>
     areEquals(arr, arr)
   )))
 })

@@ -17,6 +17,6 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "test": "mocha './test/*.specs.ts' --require ts-node/register"
+    "test": "mocha './test/*.specs.ts' --require ts-node/register --timeout 10000"
   }
 }

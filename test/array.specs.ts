@@ -1,6 +1,6 @@
 import "mocha";
 import fc from "fast-check";
-import { chunk } from "../src/array";
+import { chunk, last } from "../src/array";
 
 describe("chunk: ", () => {
   it("Should split non-empty arrays into chunks of the specified size", () =>
@@ -41,3 +41,33 @@ describe("chunk: ", () => {
     ));
 
 });
+
+
+describe("last: ", () => {
+  it("Should return the last element of a non-empty array", () => {
+    fc.assert(
+      fc.property(fc.array(fc.anything(), { minLength: 1 }), (arr) => {
+        const result = last(arr);
+        return result === arr[arr.length - 1];
+      })
+    );
+  });
+
+
+    it("Should return undefined for an empty array", () => {
+      fc.assert(
+        fc.property(fc.array(fc.anything(), { maxLength: 0 }), (arr) => {
+          last(arr) === undefined
+        })
+      );
+    });
+
+  it("Should return the only element for a single-element array", () => {
+    fc.assert(
+      fc.property(fc.anything(), (element) => {
+        const arr = [element];
+        last(arr) === element
+      })
+    );
+  });
+})

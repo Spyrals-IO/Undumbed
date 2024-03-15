@@ -179,7 +179,7 @@ export const show = (arr: ReadonlyArray<string | number>, opts: { separator: str
   arr.reduce((acc, e) => acc + e.toString() + opts.separator , opts.start) + opts.end
 
 export const zip = <T1, T2>(arr1: ReadonlyArray<T1>, arr2: ReadonlyArray<T2>): ReadonlyArray<[T1, T2]> =>
-  arr1.map((e1, index) => [e1, arr2[index]])
+  arr1.flatMap((e1, index) => index in arr2 ? [[e1, arr2[index]]] : [] as ReadonlyArray<[T1, T2]>)
 
 const defaultComparator = <T>(v1: T, v2: T): boolean => v1 === v2
 export const excludes = <T>(arr: ReadonlyArray<T>, toExcludes: ReadonlyArray<T>, comparator: (v1: T, v2: T) => boolean = defaultComparator): ReadonlyArray<T> =>

@@ -1,6 +1,6 @@
 import "mocha";
 import fc from "fast-check";
-import { sum, chunk, last, zipWithIndex, unzip, distinct, range } from "../src/array";
+import { sum, chunk, last, zipWithIndex, unzip, distinct, range, zip } from "../src/array";
 import { areEquals } from "../src/any";
 
 const anythingButNan = () => fc.anything().filter(thing => !Number.isNaN(thing))
@@ -231,3 +231,34 @@ describe("range: ", () => {
     )
   })
 })
+
+describe("zip: ", () => {
+  it("Should zip two arrays into an array of tuples", () => {
+    fc.assert(
+      fc.property(
+        fc.array(anythingButNan()),
+        fc.array(anythingButNan()),
+        (arr1, arr2) => {
+          const result = zip(arr1, arr2);
+          return (
+            result.length === Math.min(arr1.length, arr2.length) &&
+            result.every(([a, b], i) => areEquals(a, arr1[i]) && areEquals(b, arr2[i]))
+          );
+        }
+      )
+    );
+  });
+
+  const twoArraysButSecondIsLonger = () => fc.array(anythingButNan()).chain(arr => fc.tuple(fc.constant(arr), fc.array(anythingButNan(), {minLength: arr.length})))
+  it("Should stop zipping when the first array has no more elements", () => {
+    fc.assert(
+      fc.property(
+        twoArraysButSecondIsLonger(),
+        ([arr1, arr2]) => {
+          const result = zip(arr1, arr2);
+          return result.length === arr1.length
+        }
+      )
+    );
+  });
+});

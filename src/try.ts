@@ -10,6 +10,21 @@ export interface Try<T> {
   errorOrElse(defaultError: Error): Error
 }
 
+export const isTry = (value: unknown): value is Try<unknown> => 
+  value instanceof InnerTry || (
+    typeof value === 'object' &&
+    value !== null &&
+    'value' in value &&
+    'map' in value &&
+    'flatMap' in value &&
+    'flatten' in value &&
+    'mapError' in value &&
+    'recover' in value &&
+    'getOrElse' in value &&
+    'errorOrElse' in value
+  )
+
+
 export const Try = <T>(block: () => T): Try<T> => {
   try {
     return new InnerTry(block())
@@ -61,7 +76,7 @@ export const flatRecover = <T, T1>(tr: Try<T>, f: (err: Error) => Try<T1>): Try<
   const recovered = recover(tr, f)
   if(recovered.value instanceof Error) {
     return recovered as unknown as Try<T | T1>
-  } else if(recovered.value instanceof Try) {
+  } else if(isTry(recovered.value)) {
     return (recovered as Try<Try<T1>>).flatten()
   } else {
     return tr

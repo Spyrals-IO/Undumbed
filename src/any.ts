@@ -1,7 +1,7 @@
-import { isArray, isBigInt, isBoolean, isDate, isNil, isNull, isNumber, isObject, isString, isSymbol, isUndefined } from "./type"
-import { isEmpty as isEmptyArray } from "./array"
-import { negate } from "./functions"
-import "./object"
+import { isArray, isBigInt, isBoolean, isDate, isNil, isNull, isNumber, isObject, isString, isSymbol, isUndefined } from "./type.js"
+import { isEmpty as isEmptyArray } from "./array.js"
+import { negate } from "./functions.js"
+import "./object.js"
 
 /**
  * Emptiness is type specific and type is check beforehand.

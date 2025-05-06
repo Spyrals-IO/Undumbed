@@ -1,6 +1,6 @@
-import { areEquals } from './any';
-import { identity } from './functions'
-import { isArray, isFunction, isNotNil } from './type';
+import { areEquals } from './any.js'
+import { identity } from './functions.js'
+import { isArray, isFunction, isNotNil } from './type.js'
 
 declare global {
   interface ReadonlyArray<T> {
@@ -179,7 +179,7 @@ export const show = (arr: ReadonlyArray<string | number>, opts: { separator: str
   arr.reduce((acc, e) => acc + e.toString() + opts.separator , opts.start) + opts.end
 
 export const zip = <T1, T2>(arr1: ReadonlyArray<T1>, arr2: ReadonlyArray<T2>): ReadonlyArray<[T1, T2]> =>
-  arr1.flatMap((e1, index) => index in arr2 ? [[e1, arr2[index]]] : [] as ReadonlyArray<[T1, T2]>)
+  arr1.flatMap((e1, index) => index in arr2 ? [[e1, arr2[index]!]] : [] as ReadonlyArray<[T1, T2]>)
 
 const defaultComparator = <T>(v1: T, v2: T): boolean => v1 === v2
 export const excludes = <T>(arr: ReadonlyArray<T>, toExcludes: ReadonlyArray<T>, comparator: (v1: T, v2: T) => boolean = defaultComparator): ReadonlyArray<T> =>
@@ -219,8 +219,8 @@ export const shuffle = <T>(arr: ReadonlyArray<T>): ReadonlyArray<T> => {
   const newArray = [...arr]
   for(let i = newArray.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    const tmp = newArray[i]
-    newArray[i] = newArray[j]
+    const tmp = newArray[i]!
+    newArray[i] = newArray[j]!
     newArray[j] = tmp
   }
   return newArray
@@ -231,7 +231,7 @@ export const median = (arr: ReadonlyArray<number>): number => {
 
   const mid = Math.floor(arr.length / 2)
   const nums = [...arr].sort((a, b) => a - b)
-  return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2
+  return arr.length % 2 !== 0 ? nums[mid]! : (nums[mid - 1]! + nums[mid]!) / 2
 };
 
 export const flatten = <T>(array: ReadonlyArray<ReadonlyArray<T> | null | undefined | T>): ReadonlyArray <T> => 
@@ -242,8 +242,8 @@ export const sequence = <T>(array: ReadonlyArray<Promise<T>>): Promise<ReadonlyA
 export const groupBy = <T extends Record<string, unknown>>(self: ReadonlyArray<T>, key: keyof T): ReadonlyArray<ReadonlyArray<T>> =>
   self.reduce((acc, v) => {
     const value = v[key]
-    const groupIndex = acc.findIndex((group) => group[0][key] === value)
-    acc[groupIndex].push(v)
+    const groupIndex = acc.findIndex((group) => group[0]![key] === value)
+    acc[groupIndex]!.push(v)
     return acc
   }, [] as Array<Array<T>> )
 

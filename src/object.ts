@@ -1,7 +1,8 @@
-import { isNotNil } from './type'
+import { isNotNil } from './type.js'
 
 declare global {
   interface ObjectConstructor {
+    // @ts-expect-error we are surcharging
     entries<K extends string | number | symbol, V>(obj: Record<K, V>): ReadonlyArray<[K, V]>
   }
 }
@@ -53,7 +54,7 @@ export const flatten = <K extends string | number | symbol, V>(obj: Record<K, nu
   Object.fromEntries(entries(obj).filter((kv): kv is [K, V] => isNotNil(kv[1]))) as never
 
 export const includes = <K extends string | number | symbol, V, K2  extends K, V2 extends V>(self: Record<K, V>, other: Record<K2, V2>): self is Record<K, V> & Record<K2, V2> =>
-  Object.entries(other).filter(([k, v]) => self[k] !== v).length !== 0
+  Object.entries(other).filter(([k, v]) => self[k as K] !== v).length !== 0
 
 // @ts-expect-error overloading
 export function filter<K extends string | number | symbol, V>(self: Record<K, V>, f: (k: K, v: V, index: number, obj: Record<K, V>) => boolean): Record<K, V>
@@ -66,7 +67,7 @@ export const filter = <K extends string | number | symbol, V>(self: Record<K, V>
   flatten(map(self, (k, v, i, r) => f(k, v, i, r) ? v : null))
 
 export const reduce = <K extends  string | number | symbol, V, R>(self: Record<K, V>, f: (acc: R, k: K, v: V, i: number, obj: typeof self) => R, init: R): R =>
-  Object.entries(self).reduce((acc, [k, v], i) => f(acc, k, v, i, self), init)
+  Object.entries(self).reduce((acc, [k, v], i) => f(acc, k as K, v as V, i, self), init)
 
 export const sequence = <K extends string | number | symbol, V>(self: Record<string, Promise<V>>): Promise<Record<K, V>> =>
   Promise.all(Object.entries(self).map(([k, pv]) => pv.then((v) => [k, v] as const))).then(Object.fromEntries)
@@ -77,8 +78,8 @@ export const sum = <K extends string | number | symbol>(self: Record<K, number>)
 export const median = <K extends string | number | symbol>(self: Record<K, number>): number => {
   const sorted = (Object.values(self) as Array<number>).sort((a, b) => a - b)
   return sorted.length % 2 === 0 
-  ? sorted[sorted.length / 2]
-  : (sorted[Math.floor(sorted.length)] + sorted[Math.ceil(sorted.length)]) / 2
+  ? sorted[sorted.length / 2]!
+  : (sorted[Math.floor(sorted.length)]! + sorted[Math.ceil(sorted.length)]!) / 2
 }
 
 export const isEmpty = (self: Record<string, unknown>): boolean =>

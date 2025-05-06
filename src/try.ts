@@ -91,7 +91,7 @@ export const getOrElse = <T, T1>(tr: Try<T>, other: T1): T | T1 => {
   }
 }
 
-export const errorOrElse = <T, T1>(tr: Try<T>, defaultError: Error): Error => {
+export const errorOrElse = <T>(tr: Try<T>, defaultError: Error): Error => {
   if(tr.value instanceof Error) {
     return tr.value
   } else {

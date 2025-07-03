@@ -7,7 +7,7 @@ export default defineConfig({
       entry: 'index.ts',
       name: 'Undumbed',
       formats: ['es'],
-      fileName: 'undumbed',
+      fileName: 'index',
     },
     rollupOptions: {
       external: [
@@ -22,5 +22,7 @@ export default defineConfig({
   plugins: [dts({
     insertTypesEntry: true,
     outDir: 'dist',
+    include: ['index.ts', 'src/**/*'],
+    exclude: ['test/**/*', 'vite.config.ts', 'vitest.config.ts']
   })],
 }) 

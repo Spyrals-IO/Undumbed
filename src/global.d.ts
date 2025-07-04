@@ -25,6 +25,12 @@ interface ArrayConstructor {
   flatten: typeof import('./array').flatten
   sequence: typeof import('./array').sequence
   groupBy: typeof import('./array').groupBy
+  partition: typeof import('./array').partition
+  collect: typeof import('./array').collect
+  sliding: typeof import('./array').sliding
+  scanLeft: typeof import('./array').scanLeft
+  scanRight: typeof import('./array').scanRight
+  iterator: typeof import('./array').iterator
 }
 
 interface ObjectConstructor {
@@ -41,6 +47,15 @@ interface ObjectConstructor {
   show: typeof import('./object').show
   excludes: typeof import('./object').excludes
   updateAt: typeof import('./object').updateAt
+  merge: typeof import('./object').merge
+  mergeWith: typeof import('./object').mergeWith
+  deepMerge: typeof import('./object').deepMerge
+  pick: typeof import('./object').pick
+  omit: typeof import('./object').omit
+  keys: typeof import('./object').keys
+  // values: typeof import('./object').values // DÉSACTIVÉ - cause crash V8
+  invert: typeof import('./object').invert
+  mapKeys: typeof import('./object').mapKeys
 }
 
 interface FunctionConstructor {

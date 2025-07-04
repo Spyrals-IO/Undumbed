@@ -75,7 +75,13 @@ Object.assign(Array, {
   median: ArrayFns.median,
   flatten: ArrayFns.flatten,
   sequence: ArrayFns.sequence,
-  groupBy: ArrayFns.groupBy
+  groupBy: ArrayFns.groupBy,
+  partition: ArrayFns.partition,
+  collect: ArrayFns.collect,
+  sliding: ArrayFns.sliding,
+  scanLeft: ArrayFns.scanLeft,
+  scanRight: ArrayFns.scanRight,
+  iterator: ArrayFns.iterator
 })
 
 // object

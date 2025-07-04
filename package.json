@@ -2,13 +2,22 @@
   "name": "undumbed",
   "version": "1.0.0",
   "description": "Array, Object, Set, Map and other structure as they should just be",
-  "repository": "git@github.com:Spyrals-IO/Undumbed.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Spyrals-IO/Undumbed.git"
+  },
+  "homepage": "https://github.com/Spyrals-IO/Undumbed#readme",
+  "bugs": {
+    "url": "https://github.com/Spyrals-IO/Undumbed/issues"
+  },
+  "keywords": ["array", "object", "functional", "utilities", "typescript"],
   "author": "Methrat0n <merlingoulet@spyrals.fr>",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "build": "vite build && cp src/global.d.ts dist/global.d.ts"
+    "build": "vite build && cp src/global.d.ts dist/global.d.ts",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/chai": "^4.3.11",
@@ -19,9 +28,14 @@
     "mocha": "^10.3.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
+    "vite": "^7.0.0",
+    "vite-plugin-dts": "^4.5.4",
     "vitest": "^1.0.0"
   },
   "packageManager": "yarn@4.9.1+sha512.f95ce356460e05be48d66401c1ae64ef84d163dd689964962c6888a9810865e39097a5e9de748876c2e0bf89b232d583c33982773e9903ae7a76257270986538",
+  "files": [
+    "dist"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts"
 }

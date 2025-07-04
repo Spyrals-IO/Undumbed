@@ -140,6 +140,88 @@ declare global {
      * Transform many promise into a single one.
      */
     sequence(this: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>>
+    /**
+     * Split the array into two arrays based on a predicate.
+     * 
+     * @example
+     * ```ts
+     * const numbers = [1, 2, 3, 4, 5, 6]
+     * const [evens, odds] = numbers.partition(n => n % 2 === 0)
+     * // evens: [2, 4, 6], odds: [1, 3, 5]
+     * ```
+     * 
+     * @returns A tuple where the first array contains elements that satisfy the predicate
+     * and the second contains elements that don't.
+     */
+    partition(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): [ReadonlyArray<T>, ReadonlyArray<T>]
+    /**
+     * Transform and filter elements in a single pass. More efficient than separate map and filter operations.
+     * 
+     * @example
+     * ```ts
+     * const numbers = [1, 2, 3, 4, 5]
+     * const result = numbers.collect(n => n % 2 === 0 ? n * 2 : 0)
+     * // [4, 8] - falsy values (0) are filtered out
+     * ```
+     * 
+     * @returns A new array containing only the truthy values.
+     */
+    collect<U>(f: (value: T, index: number, array: ReadonlyArray<T>) => U): ReadonlyArray<Exclude<U, Falsy>>
+    /**
+     * Create sliding windows of elements with the specified size.
+     * 
+     * @example
+     * ```ts
+     * const numbers = [1, 2, 3, 4, 5]
+     * const windows = numbers.sliding(3)
+     * // [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
+     * ```
+     * 
+     * @returns An array of arrays, each containing a window of the specified size.
+     */
+    sliding(size: number): ReadonlyArray<ReadonlyArray<T>>
+    /**
+     * Like reduce, but returns all intermediate results.
+     * 
+     * @example
+     * ```ts
+     * const numbers = [1, 2, 3, 4]
+     * const result = numbers.scanLeft(0, (acc, x) => acc + x)
+     * // [0, 1, 3, 6, 10]
+     * ```
+     * 
+     * @returns An array containing the initial value and all intermediate accumulator values.
+     */
+    scanLeft<U>(initial: U, f: (acc: U, value: T, index: number, array: ReadonlyArray<T>) => U): ReadonlyArray<U>
+    /**
+     * Like scanLeft, but scanning from right to left.
+     * 
+     * @example
+     * ```ts
+     * const numbers = [1, 2, 3, 4]
+     * const result = numbers.scanRight(0, (value, acc) => value + acc)
+     * // [10, 9, 7, 4, 0]
+     * ```
+     * 
+     * @returns An array containing all intermediate accumulator values and the final value.
+     */
+    scanRight<U>(initial: U, f: (value: T, acc: U, index: number, array: ReadonlyArray<T>) => U): ReadonlyArray<U>
+
+    /**
+     * Return a lazy iterator over the array elements.
+     * 
+     * @example
+     * ```ts
+     * const numbers = [1, 2, 3, 4, 5]
+     * const iter = numbers.iterator()
+     * for (const value of iter) {
+     *   console.log(value) // logs 1, 2, 3, 4, 5
+     * }
+     * ```
+     * 
+     * @returns An iterator over the array elements.
+     */
+    iterator(): Iterator<T>
   }
 }
 /** Functional style */
@@ -246,6 +328,84 @@ export const groupBy = <T extends Record<string, unknown>>(self: ReadonlyArray<T
     acc[groupIndex]!.push(v)
     return acc
   }, [] as Array<Array<T>> )
+
+export const partition = <T>(array: ReadonlyArray<T>, predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): [ReadonlyArray<T>, ReadonlyArray<T>] => {
+  const truthy: T[] = []
+  const falsy: T[] = []
+  
+  array.forEach((value, index) => {
+    if (predicate(value, index, array)) {
+      truthy.push(value)
+    } else {
+      falsy.push(value)
+    }
+  })
+  
+  return [truthy, falsy]
+}
+
+type Falsy = undefined | null | false | 0 | ''
+
+const isTruthy = <T>(value: T): value is Exclude<T, Falsy> => {
+  return !!value
+}
+
+export const collect = <T, U>(array: ReadonlyArray<T>, f: (value: T, index: number, array: ReadonlyArray<T>) => U): ReadonlyArray<Exclude<U, Falsy>> => {
+  return array.map(f).filter(isTruthy) as ReadonlyArray<Exclude<U, Falsy>>
+}
+
+export const sliding = <T>(array: ReadonlyArray<T>, size: number): ReadonlyArray<ReadonlyArray<T>> => {
+  if (size <= 0 || array.length === 0) {
+    return []
+  }
+  
+  const result: ReadonlyArray<T>[] = []
+  for (let i = 0; i <= array.length - size; i++) {
+    result.push(array.slice(i, i + size))
+  }
+  
+  return result
+}
+
+export const scanLeft = <T, U>(array: ReadonlyArray<T>, initial: U, f: (acc: U, value: T, index: number, array: ReadonlyArray<T>) => U): ReadonlyArray<U> => {
+  const result: U[] = [initial]
+  let acc = initial
+  
+  array.forEach((value, index) => {
+    acc = f(acc, value, index, array)
+    result.push(acc)
+  })
+  
+  return result
+}
+
+export const scanRight = <T, U>(array: ReadonlyArray<T>, initial: U, f: (value: T, acc: U, index: number, array: ReadonlyArray<T>) => U): ReadonlyArray<U> => {
+  const result: U[] = [initial]
+  let acc = initial
+  
+  for (let i = array.length - 1; i >= 0; i--) {
+    acc = f(array[i]!, acc, i, array)
+    result.unshift(acc)
+  }
+  
+  return result
+}
+
+
+
+export const iterator = <T>(array: ReadonlyArray<T>): Iterator<T> => {
+  let index = 0
+  
+  return {
+    next(): IteratorResult<T> {
+      if (index < array.length) {
+        return { value: array[index++]!, done: false }
+      } else {
+        return { done: true, value: undefined }
+      }
+    }
+  }
+}
 
 /** Object style */
 
@@ -367,4 +527,34 @@ Array.prototype['sequence'] = function<T>(this: ReadonlyArray<Promise<T>>): Prom
 // @ts-ignore
 Array.prototype['groupBy'] = function<T extends Record<string, unknown>>(this: ReadonlyArray<T>, key: keyof T): ReadonlyArray<ReadonlyArray<T>> {
   return groupBy(this, key)
+}
+
+// @ts-ignore
+Array.prototype['partition'] = function<T>(this: ReadonlyArray<T>, predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): [ReadonlyArray<T>, ReadonlyArray<T>] {
+  return partition(this, predicate)
+}
+
+// @ts-ignore
+Array.prototype['collect'] = function<T, U>(this: ReadonlyArray<T>, f: (value: T, index: number, array: ReadonlyArray<T>) => U): ReadonlyArray<Exclude<U, Falsy>> {
+  return collect(this, f)
+}
+
+// @ts-ignore
+Array.prototype['sliding'] = function<T>(this: ReadonlyArray<T>, size: number): ReadonlyArray<ReadonlyArray<T>> {
+  return sliding(this, size)
+}
+
+// @ts-ignore
+Array.prototype['scanLeft'] = function<T, U>(this: ReadonlyArray<T>, initial: U, f: (acc: U, value: T, index: number, array: ReadonlyArray<T>) => U): ReadonlyArray<U> {
+  return scanLeft(this, initial, f)
+}
+
+// @ts-ignore
+Array.prototype['scanRight'] = function<T, U>(this: ReadonlyArray<T>, initial: U, f: (value: T, acc: U, index: number, array: ReadonlyArray<T>) => U): ReadonlyArray<U> {
+  return scanRight(this, initial, f)
+}
+
+// @ts-ignore
+Array.prototype['iterator'] = function<T>(this: ReadonlyArray<T>): Iterator<T> {
+  return iterator(this)
 }

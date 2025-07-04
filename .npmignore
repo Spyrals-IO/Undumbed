@@ -1,0 +1,31 @@
+# Fichiers sources
+src/
+test/
+*.ts
+!*.d.ts
+
+# Configuration de développement
+tsconfig.json
+vite.config.ts
+vitest.config.ts
+.vscode/
+.idea/
+
+# Documentation de développement
+TODO-v2.md
+
+# Dependencies
+node_modules/
+yarn.lock
+package-lock.json
+
+# Build artifacts
+*.tsbuildinfo
+
+# Git
+.git/
+.gitignore
+
+# Yarn
+.yarnrc.yml
+.yarn/ 
